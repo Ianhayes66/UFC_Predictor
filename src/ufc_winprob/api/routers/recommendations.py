@@ -23,12 +23,12 @@ def recommendations() -> List[RecommendationResponse]:
         RecommendationResponse(
             bout_id=row.get("bout_id", "synthetic"),
             fighter=row.get("fighter", "unknown"),
-            sportsbook="MockBook",
+            sportsbook=row.get("sportsbook", "MockBook"),
             price=float(row.get("decimal_odds", 2.0)),
             probability=float(row["probability"]),
             expected_value=float(row["expected_value"]),
             kelly=float(row["kelly"]),
-            stale=False,
+            stale=bool(row.get("stale", False)),
         )
         for _, row in df.iterrows()
     ]

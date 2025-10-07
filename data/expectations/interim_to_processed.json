@@ -1,0 +1,19 @@
+{
+  "expectation_suite_name": "interim_to_processed",
+  "meta": {
+    "notes": "Check probability bounds and odds conversion monotonicity."
+  },
+  "expectations": [
+    {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "implied_probability"}},
+    {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "normalized_probability"}},
+    {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "shin_probability"}},
+    {"expectation_type": "expect_column_to_exist", "kwargs": {"column": "z_shin"}},
+    {"expectation_type": "expect_column_values_to_be_between", "kwargs": {"column": "implied_probability", "min_value": 0.0, "max_value": 1.0, "strict_min": false, "strict_max": false}},
+    {"expectation_type": "expect_column_values_to_be_between", "kwargs": {"column": "normalized_probability", "min_value": 0.0, "max_value": 1.0, "strict_min": false, "strict_max": false}},
+    {"expectation_type": "expect_column_values_to_be_between", "kwargs": {"column": "shin_probability", "min_value": 0.0, "max_value": 1.0, "strict_min": false, "strict_max": false}},
+    {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "z_shin"}},
+    {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "implied_rank"}},
+    {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "normalized_rank"}},
+    {"expectation_type": "expect_column_values_to_not_be_null", "kwargs": {"column": "shin_rank"}}
+  ]
+}

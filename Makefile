@@ -47,7 +47,7 @@ predict: ## Generate predictions for upcoming fights
 backtest: ## Run backtest simulations
 @$(PY) -m ufc_winprob.models.backtest
 
-refresh: ## Execute daily refresh workflow
+refresh: ## Execute daily refresh workflow and publish reports
 @$(PY) -m ufc_winprob.pipelines.daily_refresh
 
 api: ## Launch FastAPI server

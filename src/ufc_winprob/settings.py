@@ -30,6 +30,8 @@ class ProvidersConfig(BaseModel):
     odds_market: str
     disable_if_robots_disallow: bool = True
     rate_limit_seconds: float = 0.75
+    rate_limit_jitter_seconds: float = 0.3
+    user_agent: str = "ufc-winprob-bot/1.0"
 
 
 class ModelConfig(BaseModel):

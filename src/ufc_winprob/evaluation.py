@@ -35,11 +35,12 @@ class EvaluationReport:
 def evaluate_predictions(y_true: Iterable[int], y_prob: Iterable[float]) -> EvaluationReport:
     true = np.asarray(list(y_true), dtype=int)
     prob = np.asarray(list(y_prob), dtype=float)
+    clipped = np.clip(prob, 1e-9, 1 - 1e-9)
     return EvaluationReport(
-        auc=float(roc_auc_score(true, prob)),
-        logloss=float(log_loss(true, prob, eps=1e-9)),
-        brier=brier_score(true, prob),
-        ece=expected_calibration_error(true, prob),
+        auc=float(roc_auc_score(true, clipped)),
+        logloss=float(log_loss(true, clipped)),
+        brier=brier_score(true, clipped),
+        ece=expected_calibration_error(true, clipped),
     )
 
 

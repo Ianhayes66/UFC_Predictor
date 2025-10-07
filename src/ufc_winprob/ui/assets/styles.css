@@ -6,3 +6,18 @@ body {
 h1, h2, h3 {
   color: #e0e6f8;
 }
+
+.stDataFrame, .stTable {
+  background-color: #101d2e !important;
+  color: #f7f9fc !important;
+}
+
+.stButton>button {
+  background-color: #1f2a3a;
+  color: #f7f9fc;
+  border: 1px solid #3a4c67;
+}
+
+.stButton>button:hover {
+  background-color: #2a3950;
+}

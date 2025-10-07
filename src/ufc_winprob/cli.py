@@ -46,17 +46,17 @@ def backtest_cmd() -> None:
 
 
 @app.command()
-def refresh(mock: bool = False) -> None:
+def refresh(use_live_odds: bool = typer.Option(False, help="Pull live odds when true.")) -> None:
     """Run daily refresh pipeline."""
 
-    daily_refresh.daily_refresh(mock=mock)
+    daily_refresh.daily_refresh(use_live_odds=use_live_odds)
 
 
 @app.command()
-def upcoming() -> None:
+def upcoming(use_live_odds: bool = typer.Option(False, help="Poll live odds sources.")) -> None:
     """Update upcoming fights and EV leaderboard."""
 
-    update_upcoming.run()
+    update_upcoming.run(use_live_odds=use_live_odds)
 
 
 if __name__ == "__main__":
