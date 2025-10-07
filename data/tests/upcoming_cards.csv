@@ -1,0 +1,3 @@
+event_id,name,date,fighter_a,fighter_b
+evt-001,UFC Sample Night,2024-04-01T20:00:00+00:00,Fighter One,Fighter Two
+evt-002,UFC Sample Night 2,2024-04-08T20:00:00+00:00,Fighter Three,Fighter Four

@@ -41,6 +41,15 @@ class MarketResponse(BaseModel):
     normalized_probability: float
     overround: float
     last_updated: datetime
+    z_shin: float
+    stale: bool
+
+
+class PredictRequest(BaseModel):
+    bout_id: str
+    fighter: str
+    opponent: str
+    american_odds: Optional[float] = None
 
 
 __all__ = [
@@ -48,4 +57,5 @@ __all__ = [
     "PredictionResponse",
     "RecommendationResponse",
     "MarketResponse",
+    "PredictRequest",
 ]

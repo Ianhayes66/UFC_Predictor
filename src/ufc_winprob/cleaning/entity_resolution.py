@@ -14,8 +14,31 @@ _DEFAULT_DATA = pd.DataFrame(
     [
         {"canonical_id": "f-001", "canonical_name": "Jon Jones", "alias": "Jonny Bones"},
         {"canonical_id": "f-001", "canonical_name": "Jon Jones", "alias": "jon jones"},
-        {"canonical_id": "f-002", "canonical_name": "Alexander Volkanovski", "alias": "alex volkanovski"},
-        {"canonical_id": "f-002", "canonical_name": "Alexander Volkanovski", "alias": "alexander the great"},
+        {
+            "canonical_id": "f-002",
+            "canonical_name": "Alexander Volkanovski",
+            "alias": "alex volkanovski",
+        },
+        {
+            "canonical_id": "f-002",
+            "canonical_name": "Alexander Volkanovski",
+            "alias": "alexander the great",
+        },
+        {"canonical_id": "f-003", "canonical_name": "José Aldo", "alias": "Jose Aldo"},
+        {"canonical_id": "f-003", "canonical_name": "José Aldo", "alias": "josé aldo"},
+        {
+            "canonical_id": "f-004",
+            "canonical_name": "Joanna Jędrzejczyk",
+            "alias": "joanna jedrzejczyk",
+        },
+        {
+            "canonical_id": "f-004",
+            "canonical_name": "Joanna Jędrzejczyk",
+            "alias": "Joanna Jedrzejczyk",
+        },
+        {"canonical_id": "f-005", "canonical_name": "Stipe Miocic", "alias": "stipe miočić"},
+        {"canonical_id": "f-005", "canonical_name": "Stipe Miocic", "alias": "stipe miocic"},
+        {"canonical_id": "f-001", "canonical_name": "Jon Jones", "alias": "jon 'bones' jones"},
     ]
 )
 if not CROSSWALK_PATH.exists():  # pragma: no cover - executed during bootstrap

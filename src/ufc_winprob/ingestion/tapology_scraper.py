@@ -5,13 +5,20 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
+import random
 from pathlib import Path
 from typing import List
 from urllib.robotparser import RobotFileParser
 
 import httpx
 from loguru import logger
-from tenacity import RetryError, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import (
+    RetryError,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from ..data.schemas import Event
 from ..settings import get_settings
@@ -26,6 +33,7 @@ INTERIM_CACHE.mkdir(parents=True, exist_ok=True)
 @dataclass
 class RateLimiter:
     interval_seconds: float
+    jitter_seconds: float = 0.0
     last_call: float = 0.0
 
     def wait(self) -> None:
@@ -35,7 +43,8 @@ class RateLimiter:
         delta = now - self.last_call
         wait_time = self.interval_seconds - delta
         if wait_time > 0:
-            time.sleep(wait_time)
+            jitter = random.uniform(0, self.jitter_seconds)
+            time.sleep(wait_time + jitter)
         self.last_call = time.monotonic()
 
 
@@ -50,8 +59,12 @@ class TapologyScraper:
     ) -> None:
         settings = get_settings()
         timeout = httpx.Timeout(10.0, read=20.0)
-        self.client = session or httpx.Client(timeout=timeout, headers={"User-Agent": "ufc-winprob-bot/1.0"})
-        self.rate_limiter = RateLimiter(settings.providers.rate_limit_seconds)
+        headers = {"User-Agent": settings.providers.user_agent}
+        self.client = session or httpx.Client(timeout=timeout, headers=headers)
+        self.rate_limiter = RateLimiter(
+            settings.providers.rate_limit_seconds,
+            jitter_seconds=settings.providers.rate_limit_jitter_seconds,
+        )
         self.disable_if_disallowed = settings.providers.disable_if_robots_disallow
         self.base_url = base_url.rstrip("/")
         self.cache_dir = cache_dir
