@@ -10,13 +10,14 @@ import pandas as pd
 
 from ..data.schemas import Bout, ComponentElo, Fighter, OddsSnapshot
 from ..utils.time_utils import days_between
-from .age_curve import age_adjustment
+from .age_curve import age_curve_effect
 
 
 @dataclass
 class FeatureMatrix:
     features: pd.DataFrame
     target: pd.Series
+    metadata: pd.DataFrame | None = None
 
 
 def _elo_to_series(elo: ComponentElo, prefix: str) -> pd.Series:
@@ -49,8 +50,8 @@ def build_features(
             "age_a": fighter.age or 30,
             "age_b": opponent.age or 30,
             "age_diff": (fighter.age or 30) - (opponent.age or 30),
-            "age_effect_a": age_adjustment(fighter.age or 30, bout.weight_class),
-            "age_effect_b": age_adjustment(opponent.age or 30, bout.weight_class),
+            "age_effect_a": age_curve_effect(fighter.age or 30, bout.weight_class),
+            "age_effect_b": age_curve_effect(opponent.age or 30, bout.weight_class),
             "activity_gap": days_between(
                 (fighter.dob or opponent.dob or bout.event_date.date()).isoformat(),
                 bout.event_date,
@@ -66,12 +67,14 @@ def build_features(
         records.append(series)
         targets.append(1 if bout.winner == bout.fighter_id else 0)
     frame = pd.DataFrame(records)
-    feature_cols = [col for col in frame.columns if col not in {"bout_id", "event_id", "division"}]
+    meta_cols = [col for col in ["bout_id", "event_id", "division"] if col in frame.columns]
+    feature_cols = [col for col in frame.columns if col not in set(meta_cols)]
     if "market_prob" in frame.columns:
         frame["market_prob"] = frame["market_prob"].fillna(0.5)
     frame = frame.fillna(0.0)
     target_series = pd.Series(targets, index=frame.index, name="target")
-    return FeatureMatrix(features=frame[feature_cols], target=target_series)
+    metadata = frame[meta_cols] if meta_cols else None
+    return FeatureMatrix(features=frame[feature_cols], target=target_series, metadata=metadata)
 
 
 def synthetic_dataset(n: int = 200, seed: int = 42) -> FeatureMatrix:
@@ -122,7 +125,7 @@ def synthetic_dataset(n: int = 200, seed: int = 42) -> FeatureMatrix:
             )
         )
     matrix = build_features(bouts, fighters, elos, odds=None)
-    return matrix
+    return FeatureMatrix(features=matrix.features, target=matrix.target, metadata=matrix.metadata)
 
 
 __all__ = ["FeatureMatrix", "build_features", "synthetic_dataset"]
