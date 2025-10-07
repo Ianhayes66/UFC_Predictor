@@ -10,14 +10,30 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .htmlcov/
+.ruff_cache/
 coverage.xml
-reports/
 logs/
 *.log
 .ipynb_checkpoints/
 .DS_Store
 .cache/
-data/raw/**/*.html
+
+# Generated datasets and reports
+data/**
+!data/.gitkeep
+!data/expectations/**
+!data/tests/**
+reports/**
+!reports/.gitkeep
+
+# Binary/model artifacts
 *.parquet
+*.pkl
+*.csv
+*.png
 *.db
+
 !.gitkeep
+
+# Project outputs
+notebooks/.ipynb_checkpoints/
