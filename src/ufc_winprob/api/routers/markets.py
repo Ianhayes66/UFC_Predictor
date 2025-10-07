@@ -21,10 +21,13 @@ def markets() -> List[MarketResponse]:
     frame = pd.read_parquet(path)
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     responses: List[MarketResponse] = []
+    has_book = "book" in frame.columns
     for row in frame.itertuples(index=False):
+        book_value = str(getattr(row, "book")) if has_book else str(row.sportsbook)
         responses.append(
             MarketResponse(
                 bout_id=str(row.bout_id),
+                book=book_value,
                 sportsbook=str(row.sportsbook),
                 price=float(row.american_odds),
                 implied_probability=float(row.implied_probability),

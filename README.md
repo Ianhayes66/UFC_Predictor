@@ -206,7 +206,8 @@ The UFC Win Probability Platform is a production-ready system for ingesting publ
 | `make backtest` | Run strategy simulations, compute ROI, drawdown, and reports. |
 | `make api` | Launch the FastAPI service. |
 | `make ui` | Launch the Streamlit dashboard. |
-| `make refresh` | Trigger the daily refresh pipeline, updating odds and writing reports/EV & backtest artifacts. |
+| `make refresh` | Trigger the daily refresh pipeline, updating odds and writing `reports/ev_leaderboard.csv` and `reports/backtest_summary.json`. |
+| `ufc reports` | Preview the published EV leaderboard and backtest reports in the terminal. |
 | `make demo` | Run an end-to-end demo on synthetic data. |
 | `make check` | Run linting (ruff, black check, mypy) and pytest with coverage. |
 
