@@ -50,6 +50,7 @@ class PredictRequest(BaseModel):
     bout_id: str
     fighter: str
     opponent: str
+    division: Optional[str] = None
     american_odds: Optional[float] = None
     fighter_age: Optional[float] = None
     opponent_age: Optional[float] = None
