@@ -1,0 +1,7 @@
+inherit: base
+providers:
+  use_tapology: true
+storage:
+  backend: postgres
+logging:
+  level: INFO

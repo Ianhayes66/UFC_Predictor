@@ -1,0 +1,39 @@
+version: "3.10"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    environment:
+      - SERVICE=api
+      - TZ=${TZ:-America/Los_Angeles}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    command: ["uvicorn", "ufc_winprob.api.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    environment:
+      - SERVICE=ui
+      - TZ=${TZ:-America/Los_Angeles}
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/app
+    command: ["streamlit", "run", "src/ufc_winprob/ui/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    environment:
+      - SERVICE=job
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ./:/app
+    command: ["python", "-m", "ufc_winprob.jobs.scheduler"]

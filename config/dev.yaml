@@ -1,0 +1,7 @@
+inherit: base
+providers:
+  use_odds_api: false
+storage:
+  backend: parquet
+logging:
+  level: DEBUG
