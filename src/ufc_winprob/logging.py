@@ -13,11 +13,7 @@ _LOG_CONFIGURED = False
 
 
 def configure_logging(log_path: Optional[Path] = None) -> None:
-    """Configure loguru logging with structured JSON output.
-
-    Args:
-        log_path: Optional path for file logging. When omitted only stdout is used.
-    """
+    """Configure loguru logging to stdout and rotating file."""
 
     global _LOG_CONFIGURED
     if _LOG_CONFIGURED:
@@ -25,21 +21,31 @@ def configure_logging(log_path: Optional[Path] = None) -> None:
 
     settings = get_settings()
     log_level = settings.logging.level
+    serialize = settings.logging.json
+    default_log_path = settings.logging.directory / "app.log"
+    log_file = log_path or default_log_path
 
     logger.remove()
     logger.add(
         sink=lambda msg: print(msg, end=""),
         level=log_level,
         format=(
-            "{time:YYYY-MM-DDTHH:mm:ss.SSSZ} | {level} | {extra[event_id]!s} | {extra[bout_id]!s} | "
-            "{message}"
+            "{time:YYYY-MM-DDTHH:mm:ss.SSSZ} | {level} | {message}"
         ),
         colorize=False,
-        serialize=False,
+        serialize=serialize,
     )
-    if log_path:
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        logger.add(log_path, level=log_level, rotation="7 days", compression="zip", enqueue=True)
+    if log_file:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        logger.add(
+            log_file,
+            level=log_level,
+            rotation="7 days",
+            retention="30 days",
+            compression="zip",
+            enqueue=True,
+            serialize=serialize,
+        )
     _LOG_CONFIGURED = True
 
 

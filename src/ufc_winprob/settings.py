@@ -28,6 +28,8 @@ class ProvidersConfig(BaseModel):
     use_tapology: bool
     use_odds_api: bool
     odds_market: str
+    disable_if_robots_disallow: bool = True
+    rate_limit_seconds: float = 0.75
 
 
 class ModelConfig(BaseModel):
@@ -62,6 +64,8 @@ class LoggingConfig(BaseModel):
     """Logging configuration options."""
 
     level: str = "INFO"
+    json: bool = False
+    directory: Path = Path("data/logs")
 
 
 class AppSettings(BaseSettings):
@@ -81,6 +85,7 @@ class AppSettings(BaseSettings):
     odds_api_key: Optional[str] = None
     http_proxy: Optional[str] = None
     tz: str = "America/Los_Angeles"
+    use_live_odds: bool = False
 
     @classmethod
     def from_file(cls, env: str | None = None) -> "AppSettings":

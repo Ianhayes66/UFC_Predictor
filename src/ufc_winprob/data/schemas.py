@@ -73,6 +73,9 @@ class OddsSnapshot(BaseModel):
     implied_probability: float
     overround: float
     normalized_probability: float
+    shin_probability: float | None = None
+    z_shin: float | None = None
+    stale: bool = False
 
 
 class StyleProfile(BaseModel):

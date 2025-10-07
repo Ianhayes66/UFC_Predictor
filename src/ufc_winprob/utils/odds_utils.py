@@ -56,13 +56,18 @@ def normalize_probabilities(probabilities: Sequence[float]) -> List[float]:
 
 
 def normalize_probabilities_shin(probabilities: Sequence[float]) -> List[float]:
-    """Normalize implied probabilities using the Shin method."""
+    adjusted, _ = shin_adjustment(probabilities)
+    return adjusted
+
+
+def shin_adjustment(probabilities: Sequence[float]) -> tuple[List[float], float]:
+    """Return Shin-normalized probabilities and imbalance parameter."""
 
     probs = np.array(probabilities, dtype=float)
     if np.any(probs <= 0):
         raise ValueError("Probabilities must be positive for Shin normalization")
     if probs.size == 0:
-        return []
+        return [], 0.0
 
     q = probs / probs.sum()
 
@@ -81,7 +86,7 @@ def normalize_probabilities_shin(probabilities: Sequence[float]) -> List[float]:
 
     adjusted = (np.sqrt(z_star**2 + 4 * (1 - z_star) * (q**2)) - z_star) / (2 * (1 - z_star))
     adjusted = adjusted / adjusted.sum()
-    return adjusted.tolist()
+    return adjusted.tolist(), float(z_star)
 
 
 def overround(probabilities: Iterable[float]) -> float:
@@ -98,5 +103,6 @@ __all__ = [
     "implied_to_american",
     "normalize_probabilities",
     "normalize_probabilities_shin",
+    "shin_adjustment",
     "overround",
 ]

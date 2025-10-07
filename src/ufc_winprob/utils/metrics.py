@@ -40,6 +40,23 @@ def expected_calibration_error(y_true: Iterable[int], y_prob: Iterable[float], b
     return float(ece)
 
 
+def reliability_bins(
+    y_true: Iterable[int], y_prob: Iterable[float], bins: int = 20
+) -> tuple[np.ndarray, np.ndarray]:
+    true = np.asarray(list(y_true), dtype=float)
+    prob = np.asarray(list(y_prob), dtype=float)
+    bin_edges = np.linspace(0.0, 1.0, bins + 1)
+    prob_means: list[float] = []
+    acc_means: list[float] = []
+    for lower, upper in zip(bin_edges[:-1], bin_edges[1:]):
+        mask = (prob >= lower) & (prob < upper)
+        if not np.any(mask):
+            continue
+        prob_means.append(float(prob[mask].mean()))
+        acc_means.append(float(true[mask].mean()))
+    return np.asarray(prob_means, dtype=float), np.asarray(acc_means, dtype=float)
+
+
 def roi(y_true: Iterable[int], y_prob: Iterable[float], prices: Iterable[float]) -> float:
     true = np.asarray(list(y_true), dtype=float)
     prob = np.asarray(list(y_prob), dtype=float)
@@ -55,4 +72,11 @@ def bin_counts(probabilities: Iterable[float], bins: int = 20) -> Tuple[np.ndarr
     return hist, edges
 
 
-__all__ = ["MetricResult", "brier_score", "expected_calibration_error", "roi", "bin_counts"]
+__all__ = [
+    "MetricResult",
+    "brier_score",
+    "expected_calibration_error",
+    "roi",
+    "bin_counts",
+    "reliability_bins",
+]
