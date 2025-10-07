@@ -47,6 +47,8 @@ def build(stage: str | None = None) -> None:
 
         with tracker.step("generate_features"):
             matrix = synthetic_dataset(n=128)
+            tracker.rows_in(len(matrix.features))
+            tracker.rows_in(len(matrix.features), step="generate_features")
             df = matrix.features.copy()
             if matrix.metadata is not None:
                 df = pd.concat(
@@ -64,6 +66,8 @@ def build(stage: str | None = None) -> None:
         if stage == "features" or stage is None:
             with tracker.step("upcoming_features"):
                 upcoming = matrix.features.head(16).copy()
+                tracker.rows_in(len(upcoming))
+                tracker.rows_in(len(upcoming), step="upcoming_features")
                 if matrix.metadata is not None:
                     upcoming = pd.concat(
                         [

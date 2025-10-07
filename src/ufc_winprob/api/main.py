@@ -26,18 +26,19 @@ class PrometheusRequestMiddleware(BaseHTTPMiddleware):
         route_path = getattr(route, "path", request.url.path)
         method = request.method
         start = perf_counter()
+        status_code = "500"
         try:
             response = await call_next(request)
         except Exception:
-            duration = perf_counter() - start
             API_EXCEPTIONS.labels(route=route_path, method=method).inc()
-            API_REQUESTS.labels(route=route_path, method=method, status="500").inc()
-            API_LATENCY.labels(route=route_path, method=method).observe(duration)
             raise
-        duration = perf_counter() - start
-        API_REQUESTS.labels(route=route_path, method=method, status=str(response.status_code)).inc()
-        API_LATENCY.labels(route=route_path, method=method).observe(duration)
-        return response
+        else:
+            status_code = str(response.status_code)
+            return response
+        finally:
+            duration = perf_counter() - start
+            API_REQUESTS.labels(route=route_path, method=method, status=status_code).inc()
+            API_LATENCY.labels(route=route_path, method=method).observe(duration)
 
 
 def create_app() -> FastAPI:

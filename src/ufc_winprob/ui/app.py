@@ -1,4 +1,4 @@
-"""Streamlit dashboard for UFC win probabilities."""
+"""Streamlit application for UFC win probability insights."""
 
 from __future__ import annotations
 
@@ -88,9 +88,28 @@ def render_line_movement(market_data: pd.DataFrame) -> None:
     if market_data.empty:
         st.info("No market data available yet. Trigger a refresh to pull odds.")
         return
+
     market_data = market_data.sort_values("timestamp")
+    if "event_id" not in market_data.columns:
+        market_data["event_id"] = market_data["bout_id"].str.split("-", n=1).str[0]
+
+    event_options = market_data["event_id"].dropna().unique().tolist()
+    if not event_options:
+        st.info("No events available in the current market snapshot.")
+        return
+
+    selected_event = st.selectbox("Select event", event_options)
+    event_frame = market_data[market_data["event_id"] == selected_event]
+    bout_options = event_frame["bout_id"].unique().tolist()
+    if not bout_options:
+        st.info("No bouts available for the selected event.")
+        return
+
+    selected_bout = st.selectbox("Select bout", bout_options)
+    bout_frame = event_frame[event_frame["bout_id"] == selected_bout]
+
     summary = (
-        market_data.groupby(["bout_id", "sportsbook"])
+        bout_frame.groupby("sportsbook")
         .agg(
             open_probability=("implied_probability", "first"),
             current_probability=("implied_probability", "last"),
@@ -98,37 +117,38 @@ def render_line_movement(market_data: pd.DataFrame) -> None:
         )
         .reset_index()
     )
-    summary["movement"] = summary["current_probability"] - summary["open_probability"]
-    summary["flagged"] = summary["movement"].abs() >= 0.03
-    st.dataframe(summary)
+    summary["delta"] = summary["current_probability"] - summary["open_probability"]
+    summary = summary.sort_values("current_probability", ascending=False)
+    st.dataframe(
+        summary[["sportsbook", "open_probability", "current_probability", "delta", "last_updated"]],
+        use_container_width=True,
+    )
 
-    bout_options = summary["bout_id"].unique().tolist()
-    if not bout_options:
-        return
-    selected_bout = st.selectbox("Select bout", bout_options)
-    bout_frame = market_data[market_data["bout_id"] == selected_bout]
-    chart = bout_frame.pivot_table(
+    movement_chart = bout_frame.pivot_table(
         index="timestamp",
         columns="sportsbook",
         values="implied_probability",
         aggfunc="last",
     )
-    st.line_chart(chart)
+    if movement_chart.empty:
+        st.info("Line history not available yet for the selected bout.")
+    else:
+        st.line_chart(movement_chart)
 
 
 def render_calibration() -> None:
     st.subheader("Division Calibration Metrics")
-    metrics_path = PLOTS_DIR / "per_division_ece.csv"
+    metrics_path = Path("data/processed/metrics_by_division.csv")
     if metrics_path.exists():
         metrics = pd.read_csv(metrics_path)
         st.dataframe(metrics)
     else:
-        st.info("Upload calibration metrics to data/processed/plots/per_division_ece.csv.")
+        st.info("Calibration metrics not found. Run `make train` to generate them.")
 
     st.subheader("Reliability Plots")
     plots = sorted(PLOTS_DIR.glob("*.png"))
     if not plots:
-        st.info("No reliability plots found in data/processed/plots/.")
+        st.info("No reliability plots available. Run `make train` to create calibration visuals.")
     else:
         for image in plots:
             st.image(str(image), caption=image.stem.replace("_", " ").title())
@@ -142,14 +162,20 @@ def main() -> None:
 
     st.sidebar.header("Controls")
     use_live_default = settings.use_live_odds if live_available else False
-    use_live = st.sidebar.checkbox(
+    if "use_live_odds" not in st.session_state:
+        st.session_state["use_live_odds"] = use_live_default
+    toggle_value = st.sidebar.toggle(
         "Use live odds",
-        value=use_live_default,
+        value=st.session_state["use_live_odds"],
         disabled=not live_available,
         help="Requires ODDS_API_KEY to be configured.",
     )
+    if toggle_value != st.session_state["use_live_odds"]:
+        st.session_state["use_live_odds"] = toggle_value
+        update_upcoming(use_live_odds=toggle_value and live_available)
+        st.experimental_rerun()
     if st.sidebar.button("Refresh Data"):
-        update_upcoming(use_live_odds=use_live if live_available else False)
+        update_upcoming(use_live_odds=st.session_state["use_live_odds"] and live_available)
         st.experimental_rerun()
 
     page = st.sidebar.radio("Page", ("Overview", "Line Movement", "Calibration"))

@@ -51,6 +51,12 @@ class PredictRequest(BaseModel):
     fighter: str
     opponent: str
     american_odds: Optional[float] = None
+    fighter_age: Optional[float] = None
+    opponent_age: Optional[float] = None
+    fighter_height: Optional[float] = None
+    opponent_height: Optional[float] = None
+    fighter_reach: Optional[float] = None
+    opponent_reach: Optional[float] = None
 
 
 __all__ = [
