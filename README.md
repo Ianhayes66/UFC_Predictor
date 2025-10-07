@@ -158,6 +158,44 @@ The UFC Win Probability Platform is a production-ready system for ingesting publ
    make ui
    ```
 
+## API Usage
+
+### `/predict`
+
+The predict endpoint returns a calibrated win probability for an ad-hoc matchup. Provide bout identifiers plus any available fighter attributes to enrich the feature vector.
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+        "bout_id": "ufc-300-main",
+        "fighter": "Alex Example",
+        "opponent": "Jamie Sample",
+        "american_odds": -140,
+        "fighter_age": 31,
+        "opponent_age": 29,
+        "fighter_height": 73,
+        "opponent_height": 71,
+        "fighter_reach": 75,
+        "opponent_reach": 72
+      }'
+```
+
+Example response:
+
+```json
+{
+  "bout_id": "ufc-300-main",
+  "fighter": "Alex Example",
+  "probability": 0.62,
+  "probability_low": 0.57,
+  "probability_high": 0.67,
+  "market_probability": 0.58
+}
+```
+
+If no odds are supplied the `market_probability` field is `null` and the model infers a neutral prior.
+
 ## Architecture
 
 ```
@@ -193,6 +231,19 @@ The UFC Win Probability Platform is a production-ready system for ingesting publ
 - Automated scheduled jobs and comprehensive CI/CD with linting, tests, and coverage.
 - FastAPI for programmatic access and Streamlit UI for analysts.
 - Observability via structured logging, Prometheus metrics, and reporting artifacts.
+
+## Dashboard
+
+Launch the Streamlit UI with `make ui`. The sidebar includes a **Use live odds** toggle that is enabled when `ODDS_API_KEY` is configured; toggling it triggers a refresh of upcoming fights using the live provider. The navigation exposes **Overview**, **Line Movement**, and **Calibration** pages:
+
+- **Overview** displays the latest probabilities, EV leaderboard, calibration snapshot, and backtest summary.
+- **Line Movement** lets you select an event and bout to compare opening versus current implied probabilities by sportsbook, plus a time-series plot of movement.
+- **Calibration** surfaces per-division reliability tables and saved calibration plots, and guides you to run `make train` when assets are missing.
+
+## Reports & Metrics
+
+- Run `make refresh` to execute the full pipeline. It produces `reports/ev_leaderboard.csv` and `reports/backtest_summary.json` alongside processed artifacts.
+- The FastAPI service exposes Prometheus metrics at `GET /metrics`, including request counts, latency histograms, and pipeline instrumentation counters.
 
 ## Command Cheatsheet
 

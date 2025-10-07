@@ -59,6 +59,7 @@ def run(use_live_odds: bool | None = None) -> dict[str, Path]:
                 sportsbooks=("MockBook", "SharpBook"),
                 use_live_api=use_live_odds if use_live_odds is not None else settings.use_live_odds,
             )
+            tracker.rows_in(len(cards), step="market_odds")
             market_frame = _build_market_frame(client, cards)
             client.close()
             if not market_frame.empty:
@@ -70,6 +71,8 @@ def run(use_live_odds: bool | None = None) -> dict[str, Path]:
 
         with tracker.step("predict"):
             predictions = predict()
+            tracker.rows_in(len(predictions))
+            tracker.rows_in(len(predictions), step="predict")
             tracker.rows_out(len(predictions))
             tracker.rows_out(len(predictions), step="predict")
         price_map = (
@@ -84,6 +87,8 @@ def run(use_live_odds: bool | None = None) -> dict[str, Path]:
             enriched["american_odds"] = 120.0
         with tracker.step("leaderboard"):
             leaderboard = rank_recommendations(enriched)
+            tracker.rows_in(len(enriched))
+            tracker.rows_in(len(enriched), step="leaderboard")
             leaderboard["stale"] = False
             leaderboard["sportsbook"] = "MockBook"
             leaderboard.to_csv(LEADERBOARD_PATH, index=False)
