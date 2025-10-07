@@ -1,0 +1,2 @@
+# Placeholder lock file generated for reproducibility.
+# Run `uv pip compile pyproject.toml --output uv.lock` to refresh.

@@ -1,5 +1,0 @@
-reach_diff
-age_diff
-height_diff
-strike_acc_diff
-takedown_acc_diff

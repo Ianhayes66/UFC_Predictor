@@ -1,0 +1,38 @@
+project_name: ufc-winprob
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  models: data/models
+providers:
+  use_tapology: false
+  use_odds_api: true
+  odds_market: moneyline
+model:
+  base_seed: 42
+  calibration: isotonic
+elo:
+  components:
+    - striking
+    - grappling
+    - wrestling
+    - submissions
+    - cardio
+    - durability
+    - iq
+    - aggression
+  k_base: 24.0
+  decay_days_half_life: 365
+  division_half_life_overrides:
+    HW: 365
+    LHW: 330
+    MW: 310
+    WW: 300
+    LW: 290
+    FW: 280
+    BW: 275
+    FLW: 270
+jobs:
+  daily_refresh_cron: "0 8 * * *"
+storage:
+  backend: parquet
