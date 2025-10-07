@@ -45,6 +45,7 @@ def test_markets_returns_all_fields() -> None:
     entry = payload[0]
     expected_fields = {
         "bout_id",
+        "book",
         "sportsbook",
         "price",
         "implied_probability",
@@ -55,6 +56,7 @@ def test_markets_returns_all_fields() -> None:
         "stale",
     }
     assert expected_fields.issubset(entry.keys())
+    assert isinstance(entry["book"], str)
     assert isinstance(entry["price"], float)
     assert isinstance(entry["implied_probability"], float)
     assert isinstance(entry["z_shin"], float)

@@ -12,7 +12,13 @@ from typing import Dict, Iterable, List, Tuple
 import httpx
 import numpy as np
 from loguru import logger
-from tenacity import RetryError, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import (
+    RetryError,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from ..data.schemas import OddsSnapshot
 from ..settings import get_settings
@@ -50,7 +56,9 @@ class OddsAPIClient:
     def aggregated(self) -> Dict[str, float]:
         return self._aggregated
 
-    def fetch_odds(self, bout_id: str, prices: Dict[str, float] | None = None) -> List[OddsSnapshot]:
+    def fetch_odds(
+        self, bout_id: str, prices: Dict[str, float] | None = None
+    ) -> List[OddsSnapshot]:
         logger.info("Fetching odds for %s (live=%s)", bout_id, self.use_live_api)
         if self.use_live_api:
             try:
@@ -70,9 +78,20 @@ class OddsAPIClient:
             "bout_id": bout_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "snapshots": [snap.model_dump() for snap in snapshots],
-            "median_probability": float(np.median([snap.normalized_probability for snap in snapshots])) if snapshots else 0.0,
+            "median_probability": (
+                float(np.median([snap.normalized_probability for snap in snapshots]))
+                if snapshots
+                else 0.0
+            ),
         }
-        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        path.write_text(
+            json.dumps(
+                payload,
+                indent=2,
+                default=lambda value: value.isoformat() if isinstance(value, datetime) else value,
+            ),
+            encoding="utf-8",
+        )
         if snapshots:
             self._aggregated[bout_id] = payload["median_probability"]
 
@@ -117,12 +136,18 @@ class OddsAPIClient:
             raise ValueError("Invalid odds returned")
         return price_a, price_b
 
-    def _mock_odds(self, bout_id: str, prices: Dict[str, float] | None = None) -> List[OddsSnapshot]:
+    def _mock_odds(
+        self, bout_id: str, prices: Dict[str, float] | None = None
+    ) -> List[OddsSnapshot]:
         rng = random.Random(bout_id)
         snapshots: List[OddsSnapshot] = []
         now = datetime.now(timezone.utc)
         for book in self.sportsbooks:
-            price = prices[book] if prices and book in prices else rng.choice([-150, -110, 120, 150, 175])
+            price = (
+                prices[book]
+                if prices and book in prices
+                else rng.choice([-150, -110, 120, 150, 175])
+            )
             opponent_price = -price if price > 0 else abs(price) + 10
             snapshot = self._build_snapshot(bout_id, book, (price, opponent_price), now)
             snapshots.append(snapshot)

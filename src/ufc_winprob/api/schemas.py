@@ -35,6 +35,7 @@ class RecommendationResponse(BaseModel):
 
 class MarketResponse(BaseModel):
     bout_id: str
+    book: str
     sportsbook: str
     price: float
     implied_probability: float
